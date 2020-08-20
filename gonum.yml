@@ -1,0 +1,29 @@
+---
+- name: Test Gonum
+  hosts: builders
+  vars_files: config.yml
+  gather_facts: False
+
+  vars:
+    target: "gonum.org/v1/gonum/{{ pkg | default('...') }}"
+    version: "{{ branch | default('master') }}"
+
+  tasks:
+  - name: Fetch required branch of repository.
+    git:
+      repo: "{{ repo }}"
+      dest: "{{ path }}"
+      clone: no
+      remote: origin
+      version: "{{ version }}" 
+      key_file: "{{ key_file }}"
+
+  - name: "Run tests on {{ target }} in {{ version }} branch."
+    gotest:
+      goroot: "{{ goroot }}"
+      dir: "{{ path }}"
+      pkg: "{{ target }}"
+      timeout: 60m
+      count: "{{ count | default('') }}"
+    environment:
+      GO111MODULE: "on"
